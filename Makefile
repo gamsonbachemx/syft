@@ -46,9 +46,10 @@ test-coverage: ## Run tests with coverage report
 	$(GO) tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report written to coverage.html"
 
+# Use -timeout flag to avoid hanging on tests locally
 .PHONY: lint
 lint: ## Run linter
-	golangci-lint run ./...
+	golangci-lint run --timeout=5m ./...
 
 .PHONY: fmt
 fmt: ## Format source code
