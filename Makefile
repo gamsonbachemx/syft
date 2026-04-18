@@ -97,5 +97,5 @@ open-coverage: test-coverage ## Run tests with coverage and open report in brows
 # watch: re-run tests automatically on file changes (requires entr: brew install entr)
 # Using -r flag to restart long-running processes; -c clears screen between runs
 .PHONY: watch
-watch: ## Watch for file changes and re-run tests
+watch: ## Watch for file changes and re-run tests (requires entr)
 	find . -name '*.go' | entr -rc $(GO) test ./... -short
