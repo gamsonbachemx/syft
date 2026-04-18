@@ -47,9 +47,10 @@ test-coverage: ## Run tests with coverage report
 	@echo "Coverage report written to coverage.html"
 
 # Use -timeout flag to avoid hanging on tests locally
+# Increased timeout to 10m since 5m was occasionally not enough on my machine
 .PHONY: lint
 lint: ## Run linter
-	golangci-lint run --timeout=5m ./...
+	golangci-lint run --timeout=10m ./...
 
 .PHONY: fmt
 fmt: ## Format source code
