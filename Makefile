@@ -1,46 +1,79 @@
-OWNER = anchore
-PROJECT = syft
+# Makefile for syft - fork of anchore/syft
 
-TOOL_DIR = .tool
-BINNY = $(TOOL_DIR)/binny
-TASK = $(TOOL_DIR)/task
+BINARY := syft
+GO := go
+GOFLAGS ?= -trimpath
+LDFLAGS := -ldflags "-s -w"
+BUILD_DIR := ./dist
+MAIN_PKG := ./cmd/syft
 
-.DEFAULT_GOAL := make-default
+# Version info
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+GIT_COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-## Bootstrapping targets #################################
+LD_VERSION_FLAGS := -X main.version=$(VERSION) \
+	-X main.gitCommit=$(GIT_COMMIT) \
+	-X main.buildDate=$(BUILD_DATE)
 
-# note: we need to assume that binny and task have not already been installed
-$(BINNY):
-	@mkdir -p $(TOOL_DIR)
-	@curl -sSfL https://get.anchore.io/binny | sh -s -- -b $(TOOL_DIR)
+LDFLAGS := -ldflags "-s -w $(LD_VERSION_FLAGS)"
 
-# note: we need to assume that binny and task have not already been installed
-.PHONY: task
-$(TASK) task: $(BINNY)
-	@$(BINNY) install task -q
+.DEFAULT_GOAL := build
 
-.PHONY: ci-bootstrap-go
-ci-bootstrap-go:
-	go mod download
+.PHONY: all
+all: lint test build
 
-# this is a bootstrapping catch-all, where if the target doesn't exist, we'll ensure the tools are installed and then try again
-%:
-	@make --silent $(TASK)
-	@$(TASK) $@
+.PHONY: build
+build: ## Build the binary
+	$(GO) build $(GOFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) $(MAIN_PKG)
 
-## Shim targets #################################
+.PHONY: run
+run: ## Run the application
+	$(GO) run $(MAIN_PKG) $(ARGS)
 
-.PHONY: make-default
-make-default: $(TASK)
-	@# run the default task in the taskfile
-	@$(TASK)
+.PHONY: test
+test: ## Run unit tests
+	$(GO) test ./... -v -count=1
 
-# for those of us that can't seem to kick the habit of typing `make ...` lets wrap the superior `task` tool
-TASKS := $(shell bash -c "test -f $(TASK) && NO_COLOR=1 $(TASK) -l | grep '^\* ' | cut -d' ' -f2 | tr -d ':' | tr '\n' ' '" ) $(shell bash -c "test -f $(TASK) && NO_COLOR=1 $(TASK) -l | grep 'aliases:' | cut -d ':' -f 3 | tr '\n' ' ' | tr -d ','")
+.PHONY: test-coverage
+test-coverage: ## Run tests with coverage report
+	$(GO) test ./... -coverprofile=coverage.out -covermode=atomic
+	$(GO) tool cover -html=coverage.out -o coverage.html
 
-.PHONY: $(TASKS)
-$(TASKS): $(TASK)
-	@$(TASK) $@
+.PHONY: lint
+lint: ## Run linter
+	golangci-lint run ./...
 
-help: $(TASK)
-	@$(TASK) -l
+.PHONY: fmt
+fmt: ## Format source code
+	$(GO) fmt ./...
+	$(GO) vet ./...
+
+.PHONY: tidy
+tidy: ## Tidy go modules
+	$(GO) mod tidy
+
+.PHONY: clean
+clean: ## Remove build artifacts
+	rm -rf $(BUILD_DIR)
+	rm -f coverage.out coverage.html
+
+.PHONY: install
+install: ## Install binary to GOPATH/bin
+	$(GO) install $(GOFLAGS) $(LDFLAGS) $(MAIN_PKG)
+
+.PHONY: snapshot
+snapshot: ## Build snapshot release with goreleaser
+	goreleaser release --snapshot --clean
+
+.PHONY: release
+release: ## Build release with goreleaser
+	goreleaser release --clean
+
+.PHONY: bootstrap
+bootstrap: ## Install required tools
+	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+.PHONY: help
+help: ## Display this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
