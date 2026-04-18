@@ -95,11 +95,7 @@ open-coverage: test-coverage ## Run tests with coverage and open report in brows
 	@open coverage.html 2>/dev/null || xdg-open coverage.html 2>/dev/null || echo "Open coverage.html manually"
 
 # watch: re-run tests automatically on file changes (requires entr: brew install entr)
+# Using -r flag to restart long-running processes; -c clears screen between runs
 .PHONY: watch
 watch: ## Watch for file changes and re-run tests
-	find . -name '*.go' | entr -c make test
-
-# help: print available targets and their descriptions
-.PHONY: help
-help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	find . -name '*.go' | entr -rc $(GO) test ./... -short
