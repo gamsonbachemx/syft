@@ -88,6 +88,11 @@ bootstrap: ## Install required tools
 .PHONY: dev
 dev: fmt tidy test ## Format, tidy modules, and run unit tests (quick dev loop)
 
+# open-coverage: run tests with coverage and open the HTML report in the browser
+.PHONY: open-coverage
+open-coverage: test-coverage ## Run tests with coverage and open report in browser
+	@open coverage.html 2>/dev/null || xdg-open coverage.html 2>/dev/null || echo "Open coverage.html manually"
+
 .PHONY: help
 help: ## Display this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
