@@ -81,6 +81,7 @@ release: ## Build release with goreleaser
 .PHONY: bootstrap
 bootstrap: ## Install required tools
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	$(GO) install github.com/cespare/reflex@latest
 
 # dev: shortcut to fmt + test, useful during active development
 # Note: I removed lint from dev loop since it's slow; run `make lint` explicitly before committing
@@ -98,6 +99,7 @@ open-coverage: test-coverage ## Run tests with coverage and open report in brows
 watch: ## Watch for file changes and re-run tests
 	find . -name '*.go' | entr -c make test
 
+# help: print available targets and their descriptions
 .PHONY: help
-help: ## Display this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
