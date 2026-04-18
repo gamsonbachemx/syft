@@ -44,6 +44,7 @@ test-full: ## Run all tests including slow integration tests
 test-coverage: ## Run tests with coverage report
 	$(GO) test ./... -coverprofile=coverage.out -covermode=atomic
 	$(GO) tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report written to coverage.html"
 
 .PHONY: lint
 lint: ## Run linter
@@ -78,6 +79,10 @@ release: ## Build release with goreleaser
 .PHONY: bootstrap
 bootstrap: ## Install required tools
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# dev: shortcut to fmt + test, useful during active development
+.PHONY: dev
+dev: fmt test ## Format and run unit tests (quick dev loop)
 
 .PHONY: help
 help: ## Display this help
