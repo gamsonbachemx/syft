@@ -82,8 +82,9 @@ bootstrap: ## Install required tools
 
 # dev: shortcut to fmt + test, useful during active development
 # Note: I removed lint from dev loop since it's slow; run `make lint` explicitly before committing
+# Also added tidy here since I keep forgetting to run it after adding dependencies
 .PHONY: dev
-dev: fmt test ## Format and run unit tests (quick dev loop)
+dev: fmt tidy test ## Format, tidy modules, and run unit tests (quick dev loop)
 
 .PHONY: help
 help: ## Display this help
