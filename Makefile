@@ -93,6 +93,11 @@ dev: fmt tidy test ## Format, tidy modules, and run unit tests (quick dev loop)
 open-coverage: test-coverage ## Run tests with coverage and open report in browser
 	@open coverage.html 2>/dev/null || xdg-open coverage.html 2>/dev/null || echo "Open coverage.html manually"
 
+# watch: re-run tests automatically on file changes (requires entr: brew install entr)
+.PHONY: watch
+watch: ## Watch for file changes and re-run tests
+	find . -name '*.go' | entr -c make test
+
 .PHONY: help
 help: ## Display this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
