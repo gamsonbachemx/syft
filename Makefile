@@ -31,8 +31,13 @@ build: ## Build the binary
 run: ## Run the application
 	$(GO) run $(MAIN_PKG) $(ARGS)
 
+# Use -short to skip slow integration tests during local development
 .PHONY: test
 test: ## Run unit tests
+	$(GO) test ./... -v -count=1 -short
+
+.PHONY: test-full
+test-full: ## Run all tests including slow integration tests
 	$(GO) test ./... -v -count=1
 
 .PHONY: test-coverage
