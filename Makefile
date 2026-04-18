@@ -81,6 +81,7 @@ bootstrap: ## Install required tools
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # dev: shortcut to fmt + test, useful during active development
+# Note: I removed lint from dev loop since it's slow; run `make lint` explicitly before committing
 .PHONY: dev
 dev: fmt test ## Format and run unit tests (quick dev loop)
 
