@@ -98,4 +98,4 @@ open-coverage: test-coverage ## Run tests with coverage and open report in brows
 # Using -r flag to restart long-running processes; -c clears screen between runs
 .PHONY: watch
 watch: ## Watch for file changes and re-run tests
-	find . -name '*.go' | entr -rc $(GO) test ./... -short
+	find . -name '*.go' | entr -rc make test
