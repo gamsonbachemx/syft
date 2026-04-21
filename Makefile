@@ -97,5 +97,11 @@ open-coverage: test-coverage ## Run tests with coverage and open report in brows
 # watch: re-run tests automatically on file changes (requires entr: brew install entr)
 # Using -r flag to restart long-running processes; -c clears screen between runs
 .PHONY: watch
-watch: ## Watch for file changes and re-run tests (requires entr)
-	find . -name '*.go' | entr -rc $(GO) test ./... -short
+watch: ## Watch for file changes and re-run tests
+	find . -name '*.go' | entr -rc make test
+
+# help: print available targets
+# Tip: run `make help` to see all available targets and their descriptions
+.PHONY: help
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
